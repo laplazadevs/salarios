@@ -11,8 +11,8 @@ const SalaryVsLanguage = () => {
     d3.select(d3Container.current).selectAll("*").remove();
 
     const margin = { top: 40, right: 30, bottom: 50, left: 180 },
-      width = 800 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+      width = 700 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
 
     const svg = d3
       .select(d3Container.current)
@@ -103,7 +103,7 @@ const SalaryVsLanguage = () => {
   return (
     <div className="language-section">
       <Typography variant="h4">Salario promedio por Lenguaje de Programación</Typography>
-      <div ref={d3Container}  />
+      <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}  />
       <style>{`
         .d3-tip {
           background: rgba(0,0,0,0.8);
