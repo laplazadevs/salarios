@@ -59,6 +59,15 @@ const TypeOfCompany = () => {
         return { empresa, min, q1, median, q3, max };
       });
 
+      svg.append("text")
+        .attr("x", (width) / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "15px")
+        .attr("fill", "#fff")
+        .attr("font-weight", "bold")
+        .text("Cifras en millones COP");
+
       boxData.sort((a, b) => d3.descending(a.median, b.median));
 
       const y = d3.scaleBand()
@@ -87,7 +96,7 @@ const TypeOfCompany = () => {
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
         .attr("fill", "white")
-        .text("Salario Mensual (Mill COP)")
+        .text("Salario Mensual")
 
       svg.append("g")
         .call(
@@ -159,10 +168,11 @@ const TypeOfCompany = () => {
   return (
     <div className="company-section">
       <Typography variant="h4">Distribución de salario mensual según tipo de empresa</Typography>
-      <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "0 auto" }} />
       <Typography variant="body1" className="note">
-        de la grafica anterior, se puede inferir que las empresas extranjeras y el trabajo freelance ofrecen los salarios medianos más altos, superando ampliamente a las empresas colombianas, especialmente a las que operan solo en el mercado nacional, las cuales presentan menor variabilidad y los salarios más bajos.
+        De la siguiente grafica se puede inferir que las empresas extranjeras y el trabajo freelance ofrecen los salarios medianos más altos, superando ampliamente a las empresas colombianas, especialmente a las que operan solo en el mercado nacional, las cuales presentan menor variabilidad y los salarios más bajos.
       </Typography>
+      <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "15 auto" }} />
+      
     </div>
   );
 };

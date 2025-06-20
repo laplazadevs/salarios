@@ -60,6 +60,16 @@ const SalaryVsLanguage = () => {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(d => `<strong>${d.language}</strong><br/>Salario promedio: $${d3.format(",.0f")(d.avgSalary)}`);
+      
+      svg.append("text")
+        .attr("x", (width) / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "15px")
+        .attr("fill", "#fff")
+        .attr("font-weight", "bold")
+        .text("Cifras en millones COP");
+
 
       svg.call(tip);
 
@@ -87,7 +97,7 @@ const SalaryVsLanguage = () => {
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
         .attr("fill","white")
-        .text("Salario Mensual (Mill COP)")
+        .text("Salario Mensual")
 
       svg.append("g")
         .call(d3.axisLeft(y));
@@ -103,6 +113,10 @@ const SalaryVsLanguage = () => {
   return (
     <div className="language-section">
       <Typography variant="h4">Salario promedio por Lenguaje de Programación</Typography>
+      <Typography variant="body1" className="note">
+        Esta gráfica muestra que algunos lenguajes menos comunes, como Scala, Rust, Elixir y C, presentan los salarios promedio más altos. Esto podría indicar una alta demanda combinada con una baja oferta de profesionales especializados en estas tecnologías.
+        En contraste, lenguajes ampliamente utilizados como TypeScript, JavaScript, Python y Java registran salarios promedio más bajos, lo cual podría reflejar una mayor disponibilidad de talento en el mercado. 
+      </Typography>
       <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}  />
       <style>{`
         .d3-tip {
@@ -114,10 +128,6 @@ const SalaryVsLanguage = () => {
           pointer-events: none;
         }
       `}</style>
-      <Typography variant="body1">
-        Esta gráfica muestra que algunos lenguajes menos comunes, como Scala, Rust, Elixir y C, presentan los salarios promedio más altos. Esto podría indicar una alta demanda combinada con una baja oferta de profesionales especializados en estas tecnologías.
-        En contraste, lenguajes ampliamente utilizados como TypeScript, JavaScript, Python y Java registran salarios promedio más bajos, lo cual podría reflejar una mayor disponibilidad de talento en el mercado. 
-      </Typography>
     </div>
   );
 };

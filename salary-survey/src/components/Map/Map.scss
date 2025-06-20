@@ -1,0 +1,48 @@
+.map-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  text-align: center;
+
+  h4 {
+    margin-bottom: 0.5 rem;
+  }
+
+  .map-description {
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .map-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      flex-direction: row;
+    }
+  }
+
+  .map-svg {
+    width: 100%;
+    max-width: 600px;
+    flex-shrink: 0;
+  }
+
+  .map-legend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+
+    .legend-gradient {
+      width: 20px;
+      height: 150px;
+      background: linear-gradient(to top, #d94801, #fdae6b, #feedde);
+      border-radius: 4px;
+    }
+  }
+}
