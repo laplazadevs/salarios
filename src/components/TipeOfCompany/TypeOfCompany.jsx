@@ -40,7 +40,7 @@ const TypeOfCompany = () => {
       });
     }
 
-    d3.csv("/data/20250603.csv").then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
       const empresaKey = "¿Para qué tipo de empresa trabaja?";
       const salarioKey = "Total COP";
 

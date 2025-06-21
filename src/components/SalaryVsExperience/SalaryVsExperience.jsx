@@ -21,7 +21,7 @@ const SalaryVsExperience = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv("/data/20250603.csv").then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
       const experienciaKey = "¿Cuántos años de experiencia en desarrollo de software tiene?";
       const salarioKey = "Total COP";
 

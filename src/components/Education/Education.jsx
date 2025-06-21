@@ -19,7 +19,7 @@ const Education = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv("/data/20250603.csv").then(data => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then(data => {
       const eduKey = "¿Cuál es su nivel de formación académica?";
       const salarioKey = "Total COP";
 

@@ -1,35 +1,33 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import Typography from "@mui/material/Typography";
+import Typography from '@mui/material/Typography';
+import "./EnglishLevel.scss";
 
-const Mode = () => {
-  const ref = useRef();
+const EnglishLevel = () => {
+  const d3Container = useRef(null);
 
   useEffect(() => {
-    d3.select(ref.current).selectAll("*").remove();
+    d3.select(d3Container.current).selectAll("*").remove();
 
     const margin = { top: 40, right: 30, bottom: 80, left: 60 },
       width = 700 - margin.left - margin.right,
       height = 400 - margin.top - margin.bottom;
 
-    const svg = d3.select(ref.current)
+    const svg = d3
+      .select(d3Container.current)
       .append("svg")
       .attr("width", "100%")
       .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv("/data/20250603.csv").then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
       const inglesKey = "¿Cuál es su nivel de inglés? Marco de referencia Europeo";
-      const empresaKey = "¿Para qué tipo de empresa trabaja?";
+      const modoKey = "Su modo de trabajo es";
       const niveles = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
-      // Define los tipos de empresa que quieres mostrar
-      const tipos = [
-        "Extranjera",
-        "Colombiana",
-        "Freelance"
-      ];
+      // Obtén todos los modos de trabajo únicos
+      const modos = Array.from(new Set(data.map(d => d[modoKey]).filter(Boolean)));
 
       // Prepara los datos agrupados
       const conteo = niveles.map(nivel => {
@@ -37,9 +35,9 @@ const Mode = () => {
           const match = d[inglesKey] && d[inglesKey].match(/(A1|A2|B1|B2|C1|C2)/);
           return match && match[1] === nivel;
         });
-        const counts = tipos.map(tipo => ({
-          tipo,
-          cantidad: nivelData.filter(d => d[empresaKey] && d[empresaKey].toLowerCase().includes(tipo.toLowerCase())).length
+        const counts = modos.map(modo => ({
+          modo,
+          cantidad: nivelData.filter(d => d[modoKey] === modo).length
         }));
         return { nivel, counts };
       });
@@ -51,7 +49,7 @@ const Mode = () => {
         .padding(0.2);
 
       const x1 = d3.scaleBand()
-        .domain(tipos)
+        .domain(modos)
         .range([0, x0.bandwidth()])
         .padding(0.05);
 
@@ -61,8 +59,8 @@ const Mode = () => {
         .range([height, 0]);
 
       const color = d3.scaleOrdinal()
-        .domain(tipos)
-        .range(["#4f8cff", "#69b3a2", "#f9c846"]);
+        .domain(modos)
+        .range(d3.schemeSet2);
 
       // Eje X
       svg.append("g")
@@ -79,27 +77,27 @@ const Mode = () => {
       // Leyenda
       const legend = svg.append("g")
         .attr("transform", `translate(${width - 120},0)`);
-      tipos.forEach((tipo, i) => {
+      modos.forEach((modo, i) => {
         legend.append("rect")
           .attr("x", 0)
           .attr("y", i * 22)
           .attr("width", 18)
           .attr("height", 18)
-          .attr("fill", color(tipo));
+          .attr("fill", color(modo));
         legend.append("text")
           .attr("x", 25)
           .attr("y", i * 22 + 14)
           .attr("fill", "#fff")
           .attr("font-size", 14)
-          .text(tipo);
+          .text(modo);
       });
 
       // Tooltip
-      let tooltip = d3.select("body").select(".mode-tooltip");
+      let tooltip = d3.select("body").select(".english-tooltip");
       if (tooltip.empty()) {
         tooltip = d3.select("body")
           .append("div")
-          .attr("class", "mode-tooltip")
+          .attr("class", "english-tooltip")
           .style("position", "absolute")
           .style("background", "#222")
           .style("color", "#fff")
@@ -119,18 +117,18 @@ const Mode = () => {
         .selectAll("rect")
         .data(d => d.counts)
         .join("rect")
-        .attr("x", d => x1(d.tipo))
+        .attr("x", d => x1(d.modo))
         .attr("y", d => y(d.cantidad))
         .attr("width", x1.bandwidth())
         .attr("height", d => height - y(d.cantidad))
-        .attr("fill", d => color(d.tipo))
+        .attr("fill", d => color(d.modo))
         .on("mouseover", function (event, d) {
           tooltip
             .style("opacity", 1)
-            .html(`<strong>Tipo:</strong> ${d.tipo}<br/><strong>Cantidad:</strong> ${d.cantidad}`)
+            .html(`<strong>Modo:</strong> ${d.modo}<br/><strong>Cantidad:</strong> ${d.cantidad}`)
             .style("left", `${event.pageX + 10}px`)
             .style("top", `${event.pageY - 30}px`);
-          d3.select(this).attr("fill", d3.rgb(color(d.tipo)).darker(1));
+          d3.select(this).attr("fill", d3.rgb(color(d.modo)).darker(1));
         })
         .on("mousemove", function (event) {
           tooltip
@@ -139,7 +137,7 @@ const Mode = () => {
         })
         .on("mouseout", function (event, d) {
           tooltip.style("opacity", 0);
-          d3.select(this).attr("fill", color(d.tipo));
+          d3.select(this).attr("fill", color(d.modo));
         });
 
       // Etiquetas de cantidad sobre cada barra
@@ -148,7 +146,7 @@ const Mode = () => {
         .data(d => d.counts)
         .join("text")
         .attr("class", "cantidad")
-        .attr("x", d => x1(d.tipo) + x1.bandwidth() / 2)
+        .attr("x", d => x1(d.modo) + x1.bandwidth() / 2)
         .attr("y", d => y(d.cantidad) - 8)
         .attr("text-anchor", "middle")
         .attr("fill", "#fff")
@@ -174,15 +172,16 @@ const Mode = () => {
     });
   }, []);
 
+
   return (
-    <div style={{ width: "100%", maxWidth: 800, margin: "0 auto" }}>
-      <Typography variant="h4">Nivel de inglés vs Tipo de empresa</Typography>
-      <Typography variant="body1">
-        La asociacion de niveles intermedios de ingles y salario se refuerza al observar que, a partir del nivel B2, la mayoría de personas trabaja en empresas extranjeras, especialmente en los niveles C1 y C2, donde esta diferencia es aún más marcada. En contraste, el trabajo freelance es poco común en todos los niveles del idioma.
+    <div className="english-section">
+      <Typography variant="h4">Cantidad de personas por nivel de inglés</Typography>
+      <Typography variant="body1" >
+        La mayoría de los encuestados se concentra en niveles intermedios de inglés, siendo B2 el más común, seguido de C1 y B1. Esto sugiere que una gran parte de los participantes posee un dominio funcional o intermedio del idioma. En contraste, los niveles básicos (A1 y A2) y el nivel más alto (C2) son menos frecuentes, lo que indica que pocos encuestados tienen un dominio muy limitado o total del inglés. Esta distribución resalta la importancia del inglés intermedio en el sector.
       </Typography>
-      <div ref={ref} style={{ width: "100%", minHeight: 400 }} />
+      <div ref={d3Container} style={{ width: "100%", maxWidth: 800, margin: "0 auto" }} />
     </div>
   );
 };
 
-export default Mode;
+export default EnglishLevel;

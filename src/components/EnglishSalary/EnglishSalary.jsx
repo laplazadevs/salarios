@@ -24,7 +24,7 @@ const EnglishSalary = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv("/data/20250603.csv").then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
       const inglesKey = "¿Cuál es su nivel de inglés? Marco de referencia Europeo";
       const salarioKey = "Total COP";
       const niveles = ["C2", "C1", "B2", "B1", "A2", "A1", "Cero"];
