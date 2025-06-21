@@ -14,7 +14,7 @@ const CirclePacking = () => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    d3.csv("/data/20250603.csv").then((rawData) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((rawData) => {
       const expKey = "¿Cuántos años de experiencia en desarrollo de software tiene?";
       const langKey = "¿En cuál de los siguientes lenguajes de programación ocupa la mayor parte de su tiempo laboral?";
 

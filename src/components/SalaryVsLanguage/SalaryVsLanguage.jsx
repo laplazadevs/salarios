@@ -22,7 +22,7 @@ const SalaryVsLanguage = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv("/data/20250603.csv").then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
       const langKey = "¿En cuál de los siguientes lenguajes de programación ocupa la mayor parte de su tiempo laboral?";
       const salarioKey = "Total COP";
 

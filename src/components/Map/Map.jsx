@@ -15,8 +15,8 @@ const Map = () => {
     const height = 500 - margin.top - margin.bottom;
 
     Promise.all([
-      d3.json("/data/colombia.geo.json"),
-      d3.csv("/data/20250603.csv")
+      d3.json(`${import.meta.env.BASE_URL}data/colombia.geo.json`),
+      d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`)
     ]).then(([geoData, rawData]) => {
       const deptKey = "¿En qué departamento vive actualmente?";
 

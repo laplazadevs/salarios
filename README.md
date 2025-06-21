@@ -29,3 +29,16 @@ Asimismo, los salarios anuales fueron transformados a su equivalente mensual, lo
 El contenido de este repositorio se distribuye bajo la licencia [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/). Esto significa que puedes compartir y adaptar el material siempre que otorgues el crédito correspondiente y distribuyas tus contribuciones bajo la misma licencia.
 
 Algunas preguntas fueron adaptadas de las encuestas publicadas por https://github.com/colombia-dev/data en los años 2019, 2020 y 2021 bajo la licencia Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0).
+
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
