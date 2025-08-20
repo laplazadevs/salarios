@@ -2,7 +2,7 @@
 Este repositorio contiene los resultados de encuestas sobre salarios de desarrolladores de software en Colombia y el sitio web para visualizarlos.
 
 ## Sitio Web
-(agregar información del sitio web aquí)
+https://jaimegarcia.github.io/colombia-salary-viz-2025/
 
 ## Encuesta 2025
 Los resultados se encuentran en directorio `data` bajo el prefijo `2025*.csv`. Recopilan información anónima sobre experiencia, formación, ubicación, nivel de inglés, lenguajes de programación, modalidad de trabajo, tipo de empresa, tipo de contrato y remuneración, entre otros datos relevantes. La información no ha pasado por un proceso de preprocesamiento, por lo que puede contener errores o inconsistencias. Se recomienda revisar los datos antes de utilizarlos para análisis o visualizaciones.
