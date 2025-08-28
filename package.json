@@ -1,5 +1,5 @@
 {
-  "name": "salary-survey",
+  "name": "salarios",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist --cname salarios.lplz.dev"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

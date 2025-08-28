@@ -48,7 +48,9 @@ Este repositorio contiene los resultados de encuestas sobre salarios de desarrol
 ## Encuesta 2025
 Los resultados se encuentran en directorio `data` bajo el prefijo `2025*.csv`. Recopilan información anónima sobre experiencia, formación, ubicación, nivel de inglés, lenguajes de programación, modalidad de trabajo, tipo de empresa, tipo de contrato y remuneración, entre otros datos relevantes. La información no ha pasado por un proceso de preprocesamiento, por lo que puede contener errores o inconsistencias. Se recomienda revisar los datos antes de utilizarlos para análisis o visualizaciones.
 
-**Agradecimientos:** Alejandro Rio, Andres Santos, Andres Villegas, Brayan Hurtado, Daniel Granados, Daniel Mendoza, Daniel Sanchez, Danilo Plazas, Diego Avila, Guillermo Rodas, Isaias De La Hoz, Jahir Fiquitiva, Jorge Morales, Juan Romero, Julian David, Julian Francor, Laura, Mateo Olarte, Ricardo Trejos, Sara Palacio, Sebastian Guevara, Wilson Tovar, Yeiner Fernandez.
+**Agradecimientos Recolección:** Alejandro Rio, Andres Santos, Andres Villegas, Brayan Hurtado, Daniel Granados, Daniel Mendoza, Daniel Sanchez, Danilo Plazas, Diego Avila, Guillermo Rodas, Isaias De La Hoz, Jahir Fiquitiva, Jorge Morales, Juan Romero, Julian David, Julian Francor, Laura, Mateo Olarte, Ricardo Trejos, Sara Palacio, Sebastian Guevara, Wilson Tovar, Yeiner Fernandez.
+
+**Agradecimientos Sitio:** [Audreylopez22](https://github.com/Audreylopez22).
 
 ## Licencia
 
