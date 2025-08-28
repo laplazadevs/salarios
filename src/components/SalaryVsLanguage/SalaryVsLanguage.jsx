@@ -1,18 +1,24 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import Typography from '@mui/material/Typography';
-import d3Tip from "d3-tip";
 import "./SalaryVsLanguage.scss";
 
 const SalaryVsLanguage = () => {
   const d3Container = useRef(null);
 
   useEffect(() => {
-    d3.select(d3Container.current).selectAll("*").remove();
+    // Cleanup function
+    const cleanup = () => {
+      d3.select(d3Container.current).selectAll("*").remove();
+      d3.select("body").select(".salary-language-tooltip").remove();
+    };
+    
+    cleanup();
 
-    const margin = { top: 40, right: 30, bottom: 50, left: 180 },
-      width = 700 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+    const margin = { top: 40, right: 150, bottom: 40, left: 150 },
+      width = 900 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom,
+      radius = Math.min(width, height) / 2;
 
     const svg = d3
       .select(d3Container.current)
@@ -20,114 +26,164 @@ const SalaryVsLanguage = () => {
       .attr("width", "100%")
       .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${margin.left + width/2},${margin.top + height/2})`);
 
-    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603_normalized.csv`).then((data) => {
       const langKey = "¿En cuál de los siguientes lenguajes de programación ocupa la mayor parte de su tiempo laboral?";
       const salarioKey = "Total COP";
 
-      const salarioPorLenguaje = d3.rollups(
-      data.filter(d =>
+      // Filter and process data - the normalized CSV should have clean numbers
+      const filteredData = data.filter(d =>
         d[langKey]?.trim() &&
         d[salarioKey] &&
-        !isNaN(+d[salarioKey].replace(/[^0-9.-]+/g, ""))
-      ),
-      v => d3.mean(v, d => +d[salarioKey].replace(/[^0-9.-]+/g, "")),
-      d => d[langKey].trim()
-    );
+        !isNaN(+d[salarioKey])
+      );
 
+      const salarioPorLenguaje = d3.rollups(
+        filteredData,
+        v => ({
+          avgSalary: d3.mean(v, d => +d[salarioKey]),
+          medianSalary: d3.median(v, d => +d[salarioKey]),
+          count: v.length
+        }),
+        d => d[langKey].trim()
+      );
+
+      // Filter out languages with less than 3 people for statistical relevance
       const sorted = salarioPorLenguaje
-        .sort((a, b) => d3.descending(a[1], b[1]))
-        .map(([language, avgSalary]) => ({
+        .filter(([language, stats]) => stats.count >= 3)
+        .sort((a, b) => d3.descending(a[1].avgSalary, b[1].avgSalary))
+        .map(([language, stats]) => ({
           language,
-          avgSalary
+          avgSalary: stats.avgSalary,
+          medianSalary: stats.medianSalary,
+          count: stats.count
         }));
 
-      const x = d3.scaleLinear()
-        .domain([0, d3.max(sorted, d => d.avgSalary)])
-        .range([0, width]);
+      // Create pie generator
+      const pie = d3.pie()
+        .value(d => d.count)
+        .sort((a, b) => d3.descending(a.avgSalary, b.avgSalary));
 
-      const y = d3.scaleBand()
-        .domain(sorted.map(d => d.language))
-        .range([0, height])
-        .padding(0.2);
+      // Create arc generator
+      const arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius);
 
+      // Create arc generator for labels
+      const labelArc = d3.arc()
+        .innerRadius(radius + 10)
+        .outerRadius(radius + 10);
+
+      // Use a more colorful and varied color scheme
       const color = d3.scaleOrdinal()
         .domain(sorted.map(d => d.language))
-        .range(d3.schemeCategory10);
+        .range([
+          "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00",
+          "#ffff33", "#a65628", "#f781bf", "#999999", "#66c2a5",
+          "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f",
+          "#e5c494", "#b3b3b3", "#1b9e77", "#d95f02", "#7570b3"
+        ]);
 
-      const tip = d3Tip()
-        .attr('class', 'd3-tip')
-        .offset([-10, 0])
-        .html(d => `<strong>${d.language}</strong><br/>Salario promedio: $${d3.format(",.0f")(d.avgSalary)}`);
+      // Modern tooltip
+      const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "salary-language-tooltip")
+        .style("position", "absolute")
+        .style("background", "#37353E")
+        .style("color", "#D3DAD9")
+        .style("padding", "10px 14px")
+        .style("border-radius", "8px")
+        .style("border", "1px solid #44444E")
+        .style("pointer-events", "none")
+        .style("font-size", "13px")
+        .style("box-shadow", "0 4px 8px rgba(0,0,0,0.3)")
+        .style("opacity", 0);
+
+      // Create pie slices
+      const pieData = pie(sorted);
       
-      svg.append("text")
-        .attr("x", (width) / 2)
-        .attr("y", -10)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "15px")
-        .attr("fill", "#fff")
-        .attr("font-weight", "bold")
-        .text("Cifras en millones COP");
+      svg.selectAll("path")
+        .data(pieData)
+        .join("path")
+        .attr("d", arc)
+        .attr("fill", d => color(d.data.language))
+        .attr("opacity", 0.8)
+        .attr("stroke", "#333")
+        .attr("stroke-width", 1)
+        .style("cursor", "pointer")
+        .on("mouseover", function(event, d) {
+          const percentage = ((d.endAngle - d.startAngle) / (2 * Math.PI) * 100).toFixed(1);
+          
+          tooltip
+            .style("opacity", 1)
+            .html(
+              `<strong>${d.data.language}</strong><br/>
+               <strong>Personas:</strong> ${d.data.count} (${percentage}%)<br/>
+               <strong>Promedio:</strong> ${d3.format(",.0f")(d.data.avgSalary / 1_000_000)} M COP<br/>
+               <strong>Mediana:</strong> ${d3.format(",.0f")(d.data.medianSalary / 1_000_000)} M COP`
+            )
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY - 30}px`);
+            
+          d3.select(this)
+            .attr("opacity", 1)
+            .attr("stroke-width", 3);
+        })
+        .on("mouseout", function() {
+          tooltip.style("opacity", 0);
+          d3.select(this)
+            .attr("opacity", 0.8)
+            .attr("stroke-width", 1);
+        });
 
+      // Create legend
+      const legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${radius + 40}, ${-radius})`);
 
-      svg.call(tip);
-
-      svg.selectAll("rect")
+      const legendItems = legend.selectAll(".legend-item")
         .data(sorted)
-        .join("rect")
-        .attr("y", d => y(d.language))
-        .attr("x", 0)
-        .attr("height", y.bandwidth())
-        .attr("width", d => x(d.avgSalary))
+        .join("g")
+        .attr("class", "legend-item")
+        .attr("transform", (d, i) => `translate(0, ${i * 18})`);
+
+      legendItems.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
         .attr("fill", d => color(d.language))
-        .on('mouseover', tip.show)
-        .on('mouseout', tip.hide)
-        .on('mouseover', function(event, d) {
-            console.log(d); 
-            tip.show.call(this, d);
-          })
+        .attr("opacity", 0.8);
 
-      svg.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(15).tickFormat(d => d3.format(",.0f")(d / 1_000_000)));
+      legendItems.append("text")
+        .attr("x", 18)
+        .attr("y", 6)
+        .attr("dy", "0.35em")
+        .attr("fill", "#D3DAD9")
+        .style("font-size", "11px")
+        .text(d => {
+          const shortName = d.language.length > 15 ? d.language.substring(0, 15) + "..." : d.language;
+          return `${shortName} (${d.count})`;
+        });
 
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + 40)
-        .attr("text-anchor", "middle")
-        .attr("fill","white")
-        .text("Salario Mensual")
-
-      svg.append("g")
-        .call(d3.axisLeft(y));
-
-      svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 30)
-        .attr("text-anchor", "middle")
+    }).catch(error => {
+      console.error('Error loading salary vs language data:', error);
     });
+    
+    // Return cleanup function
+    return cleanup;
   }, []);
 
   return (
-    <div className="language-section">
-      <Typography variant="h4">Salario promedio por Lenguaje de Programación</Typography>
-      <Typography variant="body1" className="note">
-        Esta gráfica muestra que algunos lenguajes menos comunes, como Scala, Rust, Elixir y C, presentan los salarios promedio más altos. Esto podría indicar una alta demanda combinada con una baja oferta de profesionales especializados en estas tecnologías.
-        En contraste, lenguajes ampliamente utilizados como TypeScript, JavaScript, Python y Java registran salarios promedio más bajos, lo cual podría reflejar una mayor disponibilidad de talento en el mercado. 
+    <div className="salary-language-section" style={{ width: "100%", maxWidth: 1100, margin: "0 auto" }}>
+      <Typography variant="h4" gutterBottom>
+        Lenguajes de Programación
       </Typography>
-      <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}  />
-      <style>{`
-        .d3-tip {
-          background: rgba(0,0,0,0.8);
-          color: #fff;
-          padding: 8px 12px;
-          border-radius: 4px;
-          font-size: 14px;
-          pointer-events: none;
-        }
-      `}</style>
+      <Typography variant="body1" className="note">
+        Este gráfico circular muestra la distribución de profesionales por lenguaje de programación. El tamaño de cada segmento representa la cantidad de desarrolladores que usan principalmente ese lenguaje. 
+        Los tooltips muestran información detallada incluyendo salarios promedio y mediana para cada tecnología.
+        Los lenguajes más populares como JavaScript, Python y Java dominan el mercado laboral colombiano.
+      </Typography>
+      <div ref={d3Container} style={{ width: "100%", minHeight: 650 }} />
     </div>
   );
 };

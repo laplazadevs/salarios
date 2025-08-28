@@ -7,7 +7,13 @@ const TypeOfCompany = () => {
   const d3Container = useRef(null);
 
   useEffect(() => {
-    d3.select(d3Container.current).selectAll("*").remove();
+    // Cleanup function
+    const cleanup = () => {
+      d3.select(d3Container.current).selectAll("*").remove();
+      d3.select("body").select(".company-tooltip").remove();
+    };
+    
+    cleanup();
 
     const margin = { top: 40, right: 30, bottom: 50, left: 120 },
       width = 800 - margin.left - margin.right,
@@ -40,7 +46,7 @@ const TypeOfCompany = () => {
       });
     }
 
-    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603_normalized.csv`).then((data) => {
       const empresaKey = "¿Para qué tipo de empresa trabaja?";
       const salarioKey = "Total COP";
 
@@ -58,15 +64,6 @@ const TypeOfCompany = () => {
         const max = d3.max(salarios);
         return { empresa, min, q1, median, q3, max };
       });
-
-      svg.append("text")
-        .attr("x", (width) / 2)
-        .attr("y", -10)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "15px")
-        .attr("fill", "#fff")
-        .attr("font-weight", "bold")
-        .text("Cifras en millones COP");
 
       boxData.sort((a, b) => d3.descending(a.median, b.median));
 
@@ -89,14 +86,18 @@ const TypeOfCompany = () => {
           d3.axisBottom(x)
             .ticks(20)
             .tickFormat(d => (d / 1_000_000))
-        );
+        )
+        .selectAll("text")
+        .style("fill", "#37353E")
+        .style("font-size", "12px");
 
       svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + 40)
         .attr("text-anchor", "middle")
-        .attr("fill", "white")
-        .text("Salario Mensual")
+        .attr("fill", "#37353E")
+        .style("font-size", "14px")
+        .text("Salario Mensual (millones COP)")
 
       svg.append("g")
         .call(
@@ -104,13 +105,27 @@ const TypeOfCompany = () => {
             .tickFormat(d => d.split(' ').length > 2 ? d.replace(/(.+?\s.+?)\s(.+)/, '$1\n$2') : d)
         )
         .selectAll(".tick text")
+        .style("fill", "#37353E")
+        .style("font-size", "12px")
         .call(wrap, margin.left - 20);
 
-      svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height / 2)
-        .attr("y", -margin.left + 30)
-        .attr("text-anchor", "middle")
+      // Style axis lines
+      svg.selectAll(".domain, .tick line")
+        .style("stroke", "#44444E");
+
+      // Tooltip
+      const tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "company-tooltip")
+        .style("position", "absolute")
+        .style("background", "#37353E")
+        .style("color", "#D3DAD9")
+        .style("padding", "8px 12px")
+        .style("border-radius", "6px")
+        .style("border", "1px solid #44444E")
+        .style("pointer-events", "none")
+        .style("font-size", "13px")
+        .style("opacity", 0);
 
       svg.selectAll("vertLines")
         .data(boxData)
@@ -119,7 +134,7 @@ const TypeOfCompany = () => {
         .attr("x2", d => x(d.max))
         .attr("y1", d => y(d.empresa) + y.bandwidth() / 2)
         .attr("y2", d => y(d.empresa) + y.bandwidth() / 2)
-        .attr("stroke", "#999")
+        .attr("stroke", "#44444E")
         .attr("stroke-width", 2);
 
       svg.selectAll("boxes")
@@ -129,9 +144,34 @@ const TypeOfCompany = () => {
         .attr("width", d => x(d.q3) - x(d.q1))
         .attr("y", d => y(d.empresa) + y.bandwidth() / 4)
         .attr("height", y.bandwidth() / 2)
-        .attr("stroke", "#333")
-        .attr("fill", "#69b3a2")
-        .attr("opacity", 0.7);
+        .attr("stroke", "#44444E")
+        .attr("stroke-width", 2)
+        .attr("fill", "#715A5A")
+        .attr("opacity", 0.7)
+        .style("cursor", "pointer")
+        .on("mouseover", function (event, d) {
+          tooltip
+            .style("opacity", 1)
+            .html(
+              `<strong>Empresa:</strong> ${d.empresa}<br/>
+               <strong>Mediana:</strong> ${d3.format(",.0f")(d.median / 1_000_000)} M COP<br/>
+               <strong>Q1:</strong> ${d3.format(",.0f")(d.q1 / 1_000_000)} M COP<br/>
+               <strong>Q3:</strong> ${d3.format(",.0f")(d.q3 / 1_000_000)} M COP<br/>
+               <strong>Rango:</strong> ${d3.format(",.0f")(d.min / 1_000_000)} - ${d3.format(",.0f")(d.max / 1_000_000)} M COP`
+            )
+            .style("left", `${event.pageX + 10}px`)
+            .style("top", `${event.pageY - 30}px`);
+            
+          d3.select(this)
+            .attr("opacity", 1)
+            .attr("stroke-width", 3);
+        })
+        .on("mouseout", function () {
+          tooltip.style("opacity", 0);
+          d3.select(this)
+            .attr("opacity", 0.7)
+            .attr("stroke-width", 2);
+        });
 
       svg.selectAll("medianLines")
         .data(boxData)
@@ -140,7 +180,7 @@ const TypeOfCompany = () => {
         .attr("x2", d => x(d.median))
         .attr("y1", d => y(d.empresa) + y.bandwidth() / 4)
         .attr("y2", d => y(d.empresa) + y.bandwidth() * 3 / 4)
-        .attr("stroke", "#d7263d")
+        .attr("stroke", "#D3DAD9")
         .attr("stroke-width", 3);
 
       svg.selectAll("minTicks")
@@ -150,7 +190,7 @@ const TypeOfCompany = () => {
         .attr("x2", d => x(d.min))
         .attr("y1", d => y(d.empresa) + y.bandwidth() / 3)
         .attr("y2", d => y(d.empresa) + y.bandwidth() * 2 / 3)
-        .attr("stroke", "#333")
+        .attr("stroke", "#44444E")
         .attr("stroke-width", 2);
 
       svg.selectAll("maxTicks")
@@ -160,19 +200,25 @@ const TypeOfCompany = () => {
         .attr("x2", d => x(d.max))
         .attr("y1", d => y(d.empresa) + y.bandwidth() / 3)
         .attr("y2", d => y(d.empresa) + y.bandwidth() * 2 / 3)
-        .attr("stroke", "#333")
+        .attr("stroke", "#44444E")
         .attr("stroke-width", 2);
+    }).catch(error => {
+      console.error('Error loading company data:', error);
     });
+    
+    // Return cleanup function
+    return cleanup;
   }, []);
 
   return (
-    <div className="company-section">
-      <Typography variant="h4">Distribución de salario mensual según tipo de empresa</Typography>
+    <div className="company-section" style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}>
+      <Typography variant="h4" gutterBottom>
+        Salario Mensual por Tipo de Empresa
+      </Typography>
       <Typography variant="body1" className="note">
         De la siguiente grafica se puede inferir que las empresas extranjeras y el trabajo freelance ofrecen los salarios medianos más altos, superando ampliamente a las empresas colombianas, especialmente a las que operan solo en el mercado nacional, las cuales presentan menor variabilidad y los salarios más bajos.
       </Typography>
-      <div ref={d3Container} style={{ width: "100%", maxWidth: 900, margin: "15 auto" }} />
-      
+      <div ref={d3Container} style={{ width: "100%", minHeight: 450 }} />
     </div>
   );
 };

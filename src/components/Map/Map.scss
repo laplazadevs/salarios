@@ -19,9 +19,11 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 2rem;
 
     @media (max-width: 768px) {
-      flex-direction: row;
+      flex-direction: column;
+      gap: 1rem;
     }
   }
 
@@ -41,8 +43,9 @@
     .legend-gradient {
       width: 20px;
       height: 150px;
-      background: linear-gradient(to top, #d94801, #fdae6b, #feedde);
+      background: linear-gradient(to top, #37353E, #44444E, #715A5A, #D3DAD9);
       border-radius: 4px;
+      border: 1px solid #44444E;
     }
   }
 }

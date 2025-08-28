@@ -6,4 +6,26 @@
   text-align: center;
   width: 100%;
   margin-bottom: 2rem;
+  
+  svg {
+    overflow: visible;
+  }
+  
+  .bar {
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  
+  .legend-item {
+    cursor: default;
+  }
+  
+  @media (max-width: 768px) {
+    .svg-container {
+      padding: 0 1rem;
+    }
+  }
 }

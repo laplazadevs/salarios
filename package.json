@@ -12,25 +12,25 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/material": "^7.1.1",
-    "animejs": "^4.0.2",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.1",
+    "animejs": "^4.1.3",
     "d3": "^7.9.0",
     "d3-tip": "^0.9.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.25.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "eslint": "^9.25.0",
+    "@eslint/js": "^9.34.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.8",
+    "@vitejs/plugin-react": "^5.0.1",
+    "eslint": "^9.34.0",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-plugin-react-refresh": "^0.4.20",
     "gh-pages": "^6.3.0",
-    "globals": "^16.0.0",
-    "sass": "^1.89.2",
-    "vite": "^6.3.5"
+    "globals": "^16.3.0",
+    "sass": "^1.91.0",
+    "vite": "^7.1.3"
   }
 }

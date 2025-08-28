@@ -6,7 +6,13 @@ const Mode = () => {
   const ref = useRef();
 
   useEffect(() => {
-    d3.select(ref.current).selectAll("*").remove();
+    // Cleanup function
+    const cleanup = () => {
+      d3.select(ref.current).selectAll("*").remove();
+      d3.select("body").select(".mode-tooltip").remove();
+    };
+    
+    cleanup();
 
     const margin = { top: 40, right: 30, bottom: 80, left: 60 },
       width = 700 - margin.left - margin.right,
@@ -19,7 +25,7 @@ const Mode = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603_normalized.csv`).then((data) => {
       const inglesKey = "¿Cuál es su nivel de inglés? Marco de referencia Europeo";
       const empresaKey = "¿Para qué tipo de empresa trabaja?";
       const niveles = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -60,9 +66,11 @@ const Mode = () => {
         .nice()
         .range([height, 0]);
 
+      // Use our color palette
+      const paletteColors = ["#37353E", "#44444E", "#D3DAD9"];
       const color = d3.scaleOrdinal()
         .domain(tipos)
-        .range(["#4f8cff", "#69b3a2", "#f9c846"]);
+        .range(paletteColors);
 
       // Eje X
       svg.append("g")
@@ -70,7 +78,7 @@ const Mode = () => {
         .call(d3.axisBottom(x0))
         .selectAll("text")
         .style("font-size", "16px")
-        .style("fill", "#fff");
+        .style("fill", "#D3DAD9");
 
       // Eje Y
       svg.append("g")
@@ -127,7 +135,7 @@ const Mode = () => {
         .on("mouseover", function (event, d) {
           tooltip
             .style("opacity", 1)
-            .html(`<strong>Tipo:</strong> ${d.tipo}<br/><strong>Cantidad:</strong> ${d.cantidad}`)
+            .html(`<strong>Cantidad:</strong> ${d.cantidad}`)
             .style("left", `${event.pageX + 10}px`)
             .style("top", `${event.pageY - 30}px`);
           d3.select(this).attr("fill", d3.rgb(color(d.tipo)).darker(1));
@@ -141,20 +149,6 @@ const Mode = () => {
           tooltip.style("opacity", 0);
           d3.select(this).attr("fill", color(d.tipo));
         });
-
-      // Etiquetas de cantidad sobre cada barra
-      svg.selectAll("g.nivel")
-        .selectAll("text.cantidad")
-        .data(d => d.counts)
-        .join("text")
-        .attr("class", "cantidad")
-        .attr("x", d => x1(d.tipo) + x1.bandwidth() / 2)
-        .attr("y", d => y(d.cantidad) - 8)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#fff")
-        .attr("font-size", 13)
-        .attr("font-weight", "bold")
-        .text(d => d.cantidad);
 
       // Ejes etiquetas
       svg.append("text")

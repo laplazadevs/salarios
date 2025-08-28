@@ -6,4 +6,18 @@
   text-align: center;
   width: 100%;
   margin-bottom: 2rem;
+  
+  svg {
+    overflow: visible;
+  }
+  
+  .nivel rect {
+    transition: opacity 0.2s ease, stroke-width 0.2s ease;
+  }
+  
+  @media (max-width: 768px) {
+    .svg-container {
+      padding: 0 1rem;
+    }
+  }
 }

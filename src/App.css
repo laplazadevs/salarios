@@ -1,19 +1,176 @@
+/* Root and container styles */
 #root {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
+.app-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content with sticky scroll */
+.main-content {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  
+  /* Hide scrollbar for webkit browsers */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Section styles for sticky scroll */
+.section {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  
+  /* Responsive container */
+  > * {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* Typography consistent styling */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700 !important;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  p, .MuiTypography-body1 {
+    max-width: 50rem;
+    margin: 0 auto 2rem auto;
+    line-height: 1.6;
+    text-align: center;
+  }
+}
+
+/* Hero section - full height */
+#hero {
+  min-height: 100vh;
+  padding-top: 60px;
+  background-color: #37353E;
+}
+
+/* Section color palette */
+#map {
+  background-color: #44444E;
+}
+
+#languages {
+  background-color: #715A5A;
+}
+
+#education {
+  background-color: #D3DAD9;
+  color: #333;
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #333 !important;
+  }
+  
+  p, .MuiTypography-body1 {
+    color: #333 !important;
+  }
+}
+
+#english-level {
+  background-color: #37353E;
+}
+
+#english-salary {
+  background-color: #44444E;
+}
+
+#work-mode {
+  background-color: #715A5A;
+}
+
+#company-type {
+  background-color: #D3DAD9;
+  color: #333;
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #333 !important;
+  }
+  
+  p, .MuiTypography-body1 {
+    color: #333 !important;
+  }
+}
+
+#salary-language {
+  background-color: #37353E;
+}
+
+#salary-experience {
+  background-color: #44444E;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .section {
+    min-height: auto;
+    padding: 1.5rem 1rem;
+    scroll-snap-align: none; /* Disable snap on mobile for better scrolling */
+  }
+  
+  .main-content {
+    scroll-snap-type: none; /* Disable snap scroll on mobile */
+  }
+  
+  #hero {
+    min-height: 100vh;
+    padding-top: 60px;
+    margin-top: -60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 1rem 0.5rem;
+  }
+  
+  .section > * {
+    padding: 0 0.5rem;
+  }
+}
+
+/* Legacy styles for compatibility */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }

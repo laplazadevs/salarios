@@ -7,7 +7,13 @@ const EnglishLevel = () => {
   const d3Container = useRef(null);
 
   useEffect(() => {
-    d3.select(d3Container.current).selectAll("*").remove();
+    // Cleanup function
+    const cleanup = () => {
+      d3.select(d3Container.current).selectAll("*").remove();
+      d3.select("body").select(".english-tooltip").remove();
+    };
+    
+    cleanup();
 
     const margin = { top: 40, right: 30, bottom: 80, left: 60 },
       width = 700 - margin.left - margin.right,
@@ -21,7 +27,7 @@ const EnglishLevel = () => {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`).then((data) => {
+    d3.csv(`${import.meta.env.BASE_URL}data/20250603_normalized.csv`).then((data) => {
       const inglesKey = "¿Cuál es su nivel de inglés? Marco de referencia Europeo";
       const modoKey = "Su modo de trabajo es";
       const niveles = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -58,9 +64,11 @@ const EnglishLevel = () => {
         .nice()
         .range([height, 0]);
 
+      // Use our color palette for work modes
+      const paletteColors = ["#D3DAD9", "#44444E", "#715A5A", "#D3DAD9"];
       const color = d3.scaleOrdinal()
         .domain(modos)
-        .range(d3.schemeSet2);
+        .range(paletteColors.slice(0, modos.length));
 
       // Eje X
       svg.append("g")
@@ -68,11 +76,17 @@ const EnglishLevel = () => {
         .call(d3.axisBottom(x0))
         .selectAll("text")
         .style("font-size", "16px")
-        .style("fill", "#fff");
+        .style("fill", "#D3DAD9");
 
       // Eje Y
       svg.append("g")
-        .call(d3.axisLeft(y).ticks(8));
+        .call(d3.axisLeft(y).ticks(8))
+        .selectAll("text")
+        .style("fill", "#D3DAD9");
+
+      // Style axis lines
+      svg.selectAll(".domain, .tick line")
+        .style("stroke", "#44444E");
 
       // Leyenda
       const legend = svg.append("g")
@@ -83,11 +97,13 @@ const EnglishLevel = () => {
           .attr("y", i * 22)
           .attr("width", 18)
           .attr("height", 18)
-          .attr("fill", color(modo));
+          .attr("fill", color(modo))
+          .style("stroke", "#44444E")
+          .style("stroke-width", 1);
         legend.append("text")
           .attr("x", 25)
           .attr("y", i * 22 + 14)
-          .attr("fill", "#fff")
+          .attr("fill", "#D3DAD9")
           .attr("font-size", 14)
           .text(modo);
       });
@@ -99,12 +115,14 @@ const EnglishLevel = () => {
           .append("div")
           .attr("class", "english-tooltip")
           .style("position", "absolute")
-          .style("background", "#222")
-          .style("color", "#fff")
-          .style("padding", "6px 10px")
-          .style("border-radius", "4px")
+          .style("background", "#37353E")
+          .style("color", "#D3DAD9")
+          .style("padding", "8px 12px")
+          .style("border-radius", "6px")
           .style("pointer-events", "none")
           .style("font-size", "14px")
+          .style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+          .style("border", "1px solid #44444E")
           .style("opacity", 0);
       }
 
@@ -122,13 +140,17 @@ const EnglishLevel = () => {
         .attr("width", x1.bandwidth())
         .attr("height", d => height - y(d.cantidad))
         .attr("fill", d => color(d.modo))
+        .style("stroke", "#44444E")
+        .style("stroke-width", 1)
         .on("mouseover", function (event, d) {
           tooltip
             .style("opacity", 1)
-            .html(`<strong>Modo:</strong> ${d.modo}<br/><strong>Cantidad:</strong> ${d.cantidad}`)
+            .html(`<strong>Cantidad:</strong> ${d.cantidad}`)
             .style("left", `${event.pageX + 10}px`)
             .style("top", `${event.pageY - 30}px`);
-          d3.select(this).attr("fill", d3.rgb(color(d.modo)).darker(1));
+          d3.select(this)
+            .style("opacity", 0.8)
+            .style("stroke-width", 2);
         })
         .on("mousemove", function (event) {
           tooltip
@@ -137,29 +159,18 @@ const EnglishLevel = () => {
         })
         .on("mouseout", function (event, d) {
           tooltip.style("opacity", 0);
-          d3.select(this).attr("fill", color(d.modo));
+          d3.select(this)
+            .style("opacity", 1)
+            .style("stroke-width", 1);
         });
-
-      // Etiquetas de cantidad sobre cada barra
-      svg.selectAll("g.nivel")
-        .selectAll("text.cantidad")
-        .data(d => d.counts)
-        .join("text")
-        .attr("class", "cantidad")
-        .attr("x", d => x1(d.modo) + x1.bandwidth() / 2)
-        .attr("y", d => y(d.cantidad) - 8)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#fff")
-        .attr("font-size", 13)
-        .attr("font-weight", "bold")
-        .text(d => d.cantidad);
 
       // Ejes etiquetas
       svg.append("text")
         .attr("x", width / 2)
         .attr("y", height + 60)
         .attr("text-anchor", "middle")
-        .attr("fill", "white")
+        .attr("fill", "#D3DAD9")
+        .style("font-size", "14px")
         .text("Nivel de inglés (MCER)");
 
       svg.append("text")
@@ -167,19 +178,27 @@ const EnglishLevel = () => {
         .attr("x", -height / 2)
         .attr("y", -45)
         .attr("text-anchor", "middle")
-        .attr("fill", "white")
+        .attr("fill", "#D3DAD9")
+        .style("font-size", "14px")
         .text("Cantidad de personas");
+    }).catch(error => {
+      console.error('Error loading english level data:', error);
     });
+    
+    // Return cleanup function
+    return cleanup;
   }, []);
 
 
   return (
-    <div className="english-section">
-      <Typography variant="h4">Cantidad de personas por nivel de inglés</Typography>
-      <Typography variant="body1" >
+    <div className="english-section" style={{ width: "100%", maxWidth: 900, margin: "0 auto" }}>
+      <Typography variant="h4" gutterBottom>
+        Nivel de Inglés por Modalidad de Trabajo
+      </Typography>
+      <Typography variant="body1">
         La mayoría de los encuestados se concentra en niveles intermedios de inglés, siendo B2 el más común, seguido de C1 y B1. Esto sugiere que una gran parte de los participantes posee un dominio funcional o intermedio del idioma. En contraste, los niveles básicos (A1 y A2) y el nivel más alto (C2) son menos frecuentes, lo que indica que pocos encuestados tienen un dominio muy limitado o total del inglés. Esta distribución resalta la importancia del inglés intermedio en el sector.
       </Typography>
-      <div ref={d3Container} style={{ width: "100%", maxWidth: 800, margin: "0 auto" }} />
+      <div ref={d3Container} style={{ width: "100%", minHeight: 450 }} />
     </div>
   );
 };

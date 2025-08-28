@@ -7,8 +7,13 @@ const Map = () => {
   const ref = useRef();
 
   useEffect(() => {
-    // Limpia el contenedor completamente
-    d3.select(ref.current).select("*").remove();
+    // Cleanup function
+    const cleanup = () => {
+      d3.select(ref.current).selectAll("*").remove();
+      d3.select("body").select(".map-tooltip").remove();
+    };
+    
+    cleanup();
 
     const margin = { top: 40, right: 30, bottom: 50, left: 30 };
     const width = 500 - margin.left - margin.right;
@@ -16,7 +21,7 @@ const Map = () => {
 
     Promise.all([
       d3.json(`${import.meta.env.BASE_URL}data/colombia.geo.json`),
-      d3.csv(`${import.meta.env.BASE_URL}data/20250603.csv`)
+      d3.csv(`${import.meta.env.BASE_URL}data/20250603_normalized.csv`)
     ]).then(([geoData, rawData]) => {
       const deptKey = "¿En qué departamento vive actualmente?";
 
@@ -35,7 +40,11 @@ const Map = () => {
       const path = d3.geoPath().projection(projection);
 
       const maxValue = d3.max(Array.from(conteo.values()));
-      const color = d3.scaleSequential().domain([1, maxValue]).interpolator(d3.interpolateYlOrBr);
+      
+      // Use palette colors for consistent theming
+      const colorScale = d3.scaleSequential()
+        .domain([1, maxValue])
+        .interpolator(d3.interpolateRgb("#D3DAD9", "#37353E"));
 
       d3.select(ref.current).select("svg").remove();
       const svg = d3
@@ -57,12 +66,14 @@ const Map = () => {
           .append("div")
           .attr("class", "map-tooltip")
           .style("position", "absolute")
-          .style("background", "#222")
-          .style("color", "#fff")
-          .style("padding", "6px 10px")
-          .style("border-radius", "4px")
+          .style("background", "#37353E")
+          .style("color", "#D3DAD9")
+          .style("padding", "8px 12px")
+          .style("border-radius", "6px")
           .style("pointer-events", "none")
           .style("font-size", "14px")
+          .style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.3)")
+          .style("border", "1px solid #44444E")
           .style("opacity", 0);
       }
 
@@ -73,9 +84,9 @@ const Map = () => {
         .attr("d", path)
         .attr("fill", (d) => {
           const cantidad = conteo.get(normalizaNombre(d.properties.NOMBRE_DPT)) || 0;
-          return cantidad > 0 ? color(cantidad) : "#e0e0e0";
+          return cantidad > 0 ? colorScale(cantidad) : "#715A5A";
         })
-        .attr("stroke", "#222")
+        .attr("stroke", "#44444E")
         .attr("stroke-width", 1.5)
         .on("mouseover", function (event, d) {
           const nombre = d.properties.NOMBRE_DPT;
@@ -94,13 +105,18 @@ const Map = () => {
         .on("mouseout", function () {
           tooltip.style("opacity", 0);
         });
+    }).catch(error => {
+      console.error('Error loading map data:', error);
     });
+    
+    // Return cleanup function
+    return cleanup;
   }, []);
 
   return (
      <div className="map-container">
     <Typography variant="h4" gutterBottom>
-      Desarrolladores por departamento
+      Distribución por Departamento
     </Typography>
     <Typography variant="body1" className="map-description">
       Gracias a los 1001 desarrolladores que respondieron la encuesta. Su participación fue clave para recolectar datos valiosos sobre las realidades laborales, tendencias tecnológicas y salarios en el desarrollo de software en Colombia para el 2025. Este proyecto no sería posible sin ustedes. ¡Mil gracias!
@@ -109,9 +125,9 @@ const Map = () => {
     <div className="map-wrapper">
       <div ref={ref} className="map-svg" />
       <div className="map-legend">
-        <p>Menos desarrolladores</p>
+        <p>Menos</p>
         <div className="legend-gradient" />
-        <p>Más desarrolladores</p>
+        <p>Más</p>
         
       </div>
     </div>
